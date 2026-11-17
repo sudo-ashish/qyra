@@ -1,0 +1,15 @@
+{
+  "bg": "#282828",
+  "fg": "#ebdbb2",
+  "surface": "#3c3836",
+  "accent": "#7daea3",
+  "border": "#504945",
+  "urgent": "#ea6962",
+  "muted": "#7c6f64",
+  "red": "#ea6962",
+  "green": "#a9b665",
+  "yellow": "#d8a657",
+  "blue": "#7daea3",
+  "magenta": "#d3869b",
+  "cyan": "#89b482"
+}

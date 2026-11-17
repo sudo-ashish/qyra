@@ -1,0 +1,58 @@
+#!/bin/sh
+# ==============================================================================
+# qyractl — CLI IPC bridge for Qyra desktop environment
+# ==============================================================================
+
+set -e
+
+# Detect shell path
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_SHELL="$SCRIPT_DIR/../shell"
+TIER1_SHELL="$HOME/.local/share/qyra/shell"
+
+SHELL_PATH=""
+if [ -n "$QYRA_SHELL_PATH" ]; then
+    SHELL_PATH="$QYRA_SHELL_PATH"
+elif [ -d "$TIER1_SHELL" ]; then
+    SHELL_PATH="$TIER1_SHELL"
+elif [ -d "$REPO_SHELL" ]; then
+    SHELL_PATH="$(cd "$REPO_SHELL" && pwd)"
+fi
+
+# Check for --path flag override
+if [ "$1" = "--path" ] || [ "$1" = "-p" ]; then
+    SHELL_PATH="$2"
+    shift 2
+fi
+
+if [ $# -lt 2 ]; then
+    echo "Usage: qyractl [--path <dir>] <target> <function> [arguments...]"
+    echo ""
+    echo "Targets:"
+    echo "  config toggle <key>          Toggle boolean setting (e.g. bar.visible)"
+    echo "  config cycle <key>           Cycle enum setting (e.g. bar.mode)"
+    echo "  config set <key> <val>       Set configuration value"
+    echo "  config get <key>             Get configuration value"
+    echo "  settings toggle              Toggle Settings App"
+    echo "  settings openCategory <cat>  Open Settings to specific page"
+    echo "  launcher toggle              Toggle application launcher"
+    echo "  powermenu toggle             Toggle session power menu"
+    echo "  theme apply <name>           Switch active theme"
+    echo "  theme open                   Open Theme Settings page"
+    echo "  osd outputVolume <action>    raise | lower | raise-fine | lower-fine | mute-toggle"
+    echo "  osd inputVolume <action>     mute-toggle"
+    echo "  brightness action <action>   raise | lower | raise-fine | lower-fine"
+    echo "  snapshot create <label>      Create timestamped config snapshot"
+    echo "  snapshot restore <filename>  Restore specific snapshot"
+    exit 1
+fi
+
+TARGET="$1"
+FUNC="$2"
+shift 2
+
+if [ -n "$SHELL_PATH" ]; then
+    exec qs ipc -p "$SHELL_PATH" call "$TARGET" "$FUNC" "$@"
+else
+    exec qs ipc call "$TARGET" "$FUNC" "$@"
+fi

@@ -69,3 +69,11 @@ To prevent users from accidentally corrupting core logic or suffering merge conf
    - Never run background polling loops for Hyprland config sync. Apply initial state once at boot via `looknfeel.lua` / `theme.lua`, and trigger runtime `hyprctl eval` strictly on QML property change signals using a **20ms debounce `Timer`**.
 5. **Hard File Size Cap**:
    - No QML or Lua file may exceed 250 lines. Split complex views into modular sub-components immediately.
+
+## RULE 4: SANDBOX ISOLATION & ~/QDeck REFERENCE PROTOCOL
+1. **`~/QDeck` is Strictly Read-Only Reference**:
+   - Inspect `~/QDeck/hypr/` (`modules/*.lua`, `keybinds/*.lua`, `hyprlock.conf`) and `~/QDeck` scripts to match proven Hyprland Lua patterns, IPC idioms, and hardware keybindings.
+   - NEVER modify, delete, or create files inside `~/QDeck/`.
+2. **Live `~/.config/hypr/` is Off-Limits During Development**:
+   - NEVER write files to `~/.config/hypr/` or run `install.sh` against the user's live home directory during development.
+   - All Hyprland Lua code must be written inside `<repo>/hypr/` and tested exclusively via the nested compositor entrypoint (`<repo>/hypr/dev_entrypoint.lua`).

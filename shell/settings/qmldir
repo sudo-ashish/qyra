@@ -1,0 +1,8 @@
+SettingsWindow 1.0 SettingsWindow.qml
+DynamicControl 1.0 DynamicControl.qml
+SettingSlider 1.0 SettingSlider.qml
+SettingsSidebar 1.0 SettingsSidebar.qml
+ThemePage 1.0 ThemePage.qml
+ThemeCreatorModal 1.0 ThemeCreatorModal.qml
+SnapshotPage 1.0 SnapshotPage.qml
+UpdatePage 1.0 UpdatePage.qml

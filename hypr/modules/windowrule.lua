@@ -1,0 +1,72 @@
+--------------------------------
+---- WINDOWS AND WORKSPACES ----
+--------------------------------
+
+hl.window_rule({
+	name = "suppress-maximize-events",
+	match = { class = ".*" },
+	suppress_event = "maximize",
+})
+
+hl.window_rule({
+	name = "fix-xwayland-drags",
+	match = {
+		class = "^$",
+		title = "^$",
+		xwayland = true,
+		float = true,
+		fullscreen = false,
+		pin = false,
+	},
+	no_focus = true,
+})
+
+hl.window_rule({
+	name = "imv-rule",
+	match = { class = "imv" },
+	float = true,
+	center = true,
+	content = "photo",
+	size = "960 650",
+	opacity = "1.0 override",
+})
+
+hl.window_rule({
+	name = "nautilus",
+	match = { class = "org.gnome.Nautilus" },
+	opacity = "1.0 override",
+})
+
+hl.window_rule({
+	name = "media-tools-float",
+	match = { class = "^(org.localsend.localsend_app|org.pulseaudio.pavucontrol)" },
+	float = true,
+	center = true,
+	size = "960 650",
+})
+
+hl.window_rule({
+	name = "calculator-float",
+	match = { class = "org.gnome.Calculator" },
+	float = true,
+	center = true,
+})
+
+hl.window_rule({
+	name = "quickshell-reload-popup-suppress",
+	match = { title = "^Quickshell: Config.*" },
+	workspace = "special:silent silent",
+	no_focus = true,
+})
+
+--------------------------------
+---- QUICKSHELL LAYER RULES ----
+--------------------------------
+
+hl.layer_rule({
+	name = "quickshell-blur",
+	match = { namespace = "^quickshell-.*" },
+	blur = true,
+	blur_popups = true,
+	ignore_alpha = 0.57,
+})

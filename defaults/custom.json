@@ -1,0 +1,3 @@
+{
+  "$comment": "Optional sparse user overrides. Merged cleanly over state.json at runtime."
+}

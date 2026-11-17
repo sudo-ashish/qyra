@@ -84,6 +84,7 @@ qyra/
     │   ├── Config.qml               # Singleton: merges Defaults + State + Custom JSON
     │   └── Schema.qml               # Singleton: metadata array for all settings
     ├── services/
+    │   ├── Apps.qml                 # Singleton: Quickshell.DesktopEntries application indexing
     │   ├── Audio.qml                # Singleton: Quickshell.Services.Pipewire
     │   ├── Battery.qml              # Singleton: Quickshell.Services.UPower
     │   ├── Bluetooth.qml            # Singleton: Quickshell.Bluetooth
@@ -91,9 +92,18 @@ qyra/
     │   ├── Media.qml                # Singleton: Quickshell.Services.Mpris
     │   ├── Network.qml              # Singleton: Quickshell.Networking
     │   ├── Notifications.qml        # Singleton: Quickshell.Services.Notifications
+    │   ├── Power.qml                # Singleton: Lock, suspend, reboot, shutdown, logout
     │   ├── Snapshot.qml             # Singleton: state.json backup & rollback manager
     │   ├── Theme.qml                # Singleton: watches current/generated/colors.json
     │   └── Updater.qml              # Singleton: checks remote version & updates Tier 1
+    ├── components/
+    │   └── ModeViewLoader.qml       # Switcher bound to Config.activeDesignStyle
+    ├── launcher/
+    │   ├── BarLauncher.qml          # Crisp centered command-palette PanelWindow
+    │   └── IslandLauncher.qml       # Top-anchored fluid Dynamic Island PanelWindow
+    ├── powermenu/
+    │   ├── BarPowerMenu.qml         # Crisp structured power dialog PanelWindow
+    │   └── IslandPowerMenu.qml      # Dynamic Island floating power pill PanelWindow
     ├── bars/
     │   ├── BarController.qml        # Loader switching FullBar <-> IslandBar
     │   ├── FullBar.qml              # Edge-anchored full-width bar view
@@ -202,6 +212,9 @@ end
     "showTray": true,
     "clockFormat": "HH:mm"
   },
+  "ui": {
+    "designStyle": "follow-bar"
+  },
   "theme": {
     "active": "gruvbox-dark",
     "followThemeBarMode": false
@@ -245,6 +258,12 @@ Each theme resides in `~/.config/themes/<theme_name>/`. Users can create new the
    - Clicking **"+ New Theme"** in Settings lets the user clone an existing theme, pick a wallpaper file, adjust color swatches (`background`, `surface`, `foreground`, `accent`, `urgent`, `border`) via QML color pickers, and save.
    - `Theme.qml` writes `~/.config/themes/<new_theme>/colors.toml`, copies the wallpaper to `background`, runs `qyra-theme-gen <new_theme>`, and switches `~/.config/themes/current` to the new theme.
 
+### Kitty Terminal Live Reload
+When switching themes (via `ThemePage.qml`, `qyractl theme apply <name>`, or `Theme.applyTheme`):
+- `qyra-theme-gen` generates `color.conf` and `generated/color.conf` containing the 16 ANSI colors, background, foreground, cursor, active borders, and tabs.
+- `~/.config/kitty/color.conf` is dynamically symlinked to `~/.config/themes/current/color.conf`.
+- Running Kitty instances are signaled via `pkill -SIGUSR1 -u "$UID" -x kitty`, triggering instant zero-restart palette reconfiguration across all open terminal windows.
+
 ---
 
 ## 6. IPC & Keybind Toggle Contract (`qyractl` <-> `IpcHandler`)
@@ -263,3 +282,41 @@ All Hyprland keybinds in `hypr/keybinds/*.lua` and terminal scripts interact wit
 | `osd` | `inputVolume` | `action: string` | `mute-toggle` |
 | `brightness` | `action` | `action: string` | `raise`, `lower`, `raise-fine`, `lower-fine` |
 | `snapshot` | `create` | `label: string` | Creates a timestamped backup of `state.json` in `~/.local/state/qyra/snapshots/` |
+| `launcher` | `toggle` | none | Opens or closes the application launcher |
+| `powermenu` | `toggle` | none | Opens or closes the power menu overlay |
+
+---
+
+## 7. Reusable ModeViewLoader & Interactive Overlays Architecture
+
+To achieve clean visual parity without duplicating business logic, interactive overlays (`launcher`, `powermenu`, `clipboard`) follow a strict 1-service-to-2-views decoupled pattern:
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│               HEADLESS SERVICE SINGLETON                        │
+│   (e.g., shell/services/Apps.qml, shell/services/Power.qml)     │
+│   - Holds state: isOpen, searchQuery, filtered items            │
+│   - Executes actions: launch(entry), lock(), suspend(), poweroff│
+│   - Pure logic & IPC bridge (Zero UI code)                      │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                   ┌─────────────┴─────────────┐
+                   ▼                           ▼
+        ModeViewLoader (activeDesignStyle == "bar")
+        └── BarLauncher.qml / BarPowerMenu.qml
+            - Crisp command palette (radius: 8, 1px border)
+            - Dense list layout, keyboard arrow navigation
+            
+        ModeViewLoader (activeDesignStyle == "island")
+        └── IslandLauncher.qml / IslandPowerMenu.qml
+            - Top-anchored fluid Dynamic Island pill (radius: 26)
+            - Animated dimension expansion, rounded app cards
+```
+
+### Dynamic Design Style Resolution
+The visual style is governed by `Config.ui.designStyle`:
+- `"follow-bar"` (default): Dynamically resolves to `Config.bar.mode` (`"bar"` or `"island"`).
+- `"bar"`: Forces rectangular command-palette overlay design language across all windows.
+- `"island"`: Forces fluid dynamic pill overlay design language across all windows.
+
+`ModeViewLoader.qml` automatically reacts to `Config.activeDesignStyle` changes and loads the corresponding view via QML `Loader` with zero latency or compositor restart.

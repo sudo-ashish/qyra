@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "bar": {
+    "visible": true,
+    "mode": "island",
+    "position": "top",
+    "height": 34,
+    "batteryMode": "hybrid",
+    "workspaceStyle": "pills",
+    "showTray": true,
+    "clockFormat": "HH:mm"
+  },
+  "ui": {
+    "designStyle": "follow-bar"
+  },
+  "theme": {
+    "active": "gruvbox-dark",
+    "followThemeBarMode": false
+  },
+  "hypr": {
+    "gapsIn": 2,
+    "gapsOut": 4,
+    "borderSize": 0,
+    "rounding": 10,
+    "roundingPower": 10,
+    "activeOpacity": 0.95,
+    "inactiveOpacity": 0.88,
+    "blurEnabled": true,
+    "blurSize": 6,
+    "blurPasses": 4,
+    "animationsEnabled": true,
+    "layout": "dwindle"
+  },
+  "input": {
+    "sensitivity": 0.5,
+    "naturalScroll": true,
+    "disableWhileTyping": true,
+    "capsToEscape": true
+  },
+  "updates": {
+    "autoCheck": true,
+    "checkIntervalHours": 12
+  }
+}
